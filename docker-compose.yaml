@@ -1,0 +1,27 @@
+# nginx proxy address - http://172.17.0.1:8099
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "5m"
+    max-file: "1"
+
+services:
+  openhab:
+    image: openhab/openhab:latest
+    container_name: openhab-app
+    restart: unless-stopped
+    logging: *default-logging
+    networks:
+      - openhab
+    ports:
+      - "8099:8080"
+    environment:
+      TZ: ${TZ:-America/New_York}
+    volumes:
+      - ./rootfs/config/openhab:/config
+      - ./rootfs/data/openhab:/data
+
+networks:
+  openhab:
+    external: false
