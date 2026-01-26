@@ -1,12 +1,20 @@
-# Openhab
+## 👋 Welcome to openhab 🚀
 
-A self-hosted openhab application.
+Vendor and technology agnostic home automation
 
-## Installation
+## 📋 Description
+
+Vendor and technology agnostic home automation
+
+## 🚀 Services
+
+- **openhab**: openhab/openhab:latest
+
+## 📦 Installation
 
 ### Option 1: Quick Install
 ```bash
-curl -q -LSsf "https://raw.githubusercontent.com/composemgr/openhab/main/docker-compose.yaml" | docker compose -f - up -d
+curl -q -LSsf "https://raw.githubusercontent.com/composemgr/openhab/main/docker-compose.yaml" -o compose.yml
 ```
 
 ### Option 2: Git Clone
@@ -21,10 +29,56 @@ docker compose up -d
 composemgr install openhab
 ```
 
-## Configuration
+## 🔧 Configuration
 
-See docker-compose.yaml for environment variables and configuration options.
+### Environment Variables
 
-## Documentation
+```shell
+TZ=America/New_York
+```
 
-Check the official project documentation for detailed setup and usage information.
+See `docker-compose.yaml` for complete list of configurable options.
+
+## 🌐 Access
+
+- **Web Interface**: http://172.17.0.1:8099
+
+## 📂 Volumes
+
+- `./rootfs/config/openhab` - Data storage
+- `./rootfs/data/openhab` - Data storage
+
+## 🔍 Logging
+
+```shell
+docker compose logs -f openhab
+```
+
+## 🛠️ Management
+
+```bash
+# Start services
+docker compose up -d
+
+# Stop services
+docker compose down
+
+# Update to latest images
+docker compose pull && docker compose up -d
+
+# View logs
+docker compose logs -f
+
+# Restart services
+docker compose restart
+```
+
+## 📋 Requirements
+
+- Docker Engine 20.10+
+- Docker Compose V2+
+
+## 🤝 Author
+
+🤖 casjay: [Github](https://github.com/casjay) 🤖  
+🦄 composemgr: [Github](https://github.com/composemgr) 🦄
