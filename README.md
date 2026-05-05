@@ -45,8 +45,8 @@ See `docker-compose.yaml` for complete list of configurable options.
 
 ## 📂 Volumes
 
-- `./rootfs/config/openhab` - Data storage
-- `./rootfs/data/openhab` - Data storage
+- `./volumes/config/openhab` - Data storage
+- `./volumes/data/openhab` - Data storage
 
 ## 🔍 Logging
 
