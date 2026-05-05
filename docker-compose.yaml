@@ -19,8 +19,8 @@ services:
     environment:
       TZ: ${TZ:-America/New_York}
     volumes:
-      - ./rootfs/config/openhab:/config
-      - ./rootfs/data/openhab:/data
+      - ./volumes/config/openhab:/config
+      - ./volumes/data/openhab:/data
 
 networks:
   openhab:
