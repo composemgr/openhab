@@ -1,0 +1,50 @@
+name: openhab
+x-logging: &default-logging
+  options:
+    max-size: '5m'
+    max-file: '1'
+  driver: json-file
+
+services:
+  server:
+    image: openhab/openhab:latest
+    container_name: openhab-server
+    domainname: ${BASE_DOMAIN_NAME:-example.com}
+    hostname: ${BASE_HOST_NAME:-$HOSTNAME}
+    restart: always
+    pull_policy: always
+    logging: *default-logging
+    environment:
+      TZ: ${TZ:-America/New_York}
+      CONTAINER_NAME: openhab-server
+      HOSTNAME: ${BASE_HOST_NAME:-$HOSTNAME}
+      # openHAB runtime settings
+      OPENHAB_HTTP_PORT: ${OPENHAB_HTTP_PORT:-8080}
+      OPENHAB_HTTPS_PORT: ${OPENHAB_HTTPS_PORT:-8443}
+      EXTRA_JAVA_OPTS: -Duser.timezone=${TZ:-America/New_York}
+    volumes:
+      - './volumes/config/openhab/addons:/openhab/addons'
+      - './volumes/config/openhab/conf:/openhab/conf'
+      - './volumes/data/openhab:/openhab/userdata'
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=traefik'
+      - 'traefik.http.routers.openhab-server.entrypoints=http'
+      - 'traefik.http.routers.openhab-server.rule=Host(`${BASE_HOST_NAME:-$HOSTNAME}`)'
+      - 'traefik.http.routers.openhab-server.middlewares=openhab-server-https-redirect'
+      - 'traefik.http.middlewares.openhab-server-https-redirect.redirectscheme.scheme=https'
+      - 'traefik.http.routers.openhab-server-secure.entrypoints=https'
+      - 'traefik.http.routers.openhab-server-secure.rule=Host(`${BASE_HOST_NAME:-$HOSTNAME}`)'
+      - 'traefik.http.routers.openhab-server-secure.tls.certresolver=cloudflare'
+      - 'traefik.http.routers.openhab-server-secure.service=openhab-server'
+      - 'traefik.http.services.openhab-server.loadbalancer.server.port=8080'
+    networks:
+      - openhab
+      - traefik
+
+networks:
+  openhab:
+    name: openhab
+    external: false
+  traefik:
+    external: true

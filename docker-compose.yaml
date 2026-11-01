@@ -1,57 +1,39 @@
-# nginx proxy address - http://172.17.0.1:8099
+# nginx proxy address - http://172.17.0.1:64285
 
 name: openhab
 x-logging: &default-logging
-  driver: json-file
   options:
-    max-size: "5m"
-    max-file: "1"
+    max-size: '5m'
+    max-file: '1'
+  driver: json-file
 
 services:
-  openhab:
+  server:
     image: openhab/openhab:latest
-    pull_policy: always
-    container_name: openhab-app
+    container_name: openhab-server
+    domainname: ${BASE_DOMAIN_NAME:-example.com}
+    hostname: ${BASE_HOST_NAME:-$HOSTNAME}
     restart: always
+    pull_policy: always
     logging: *default-logging
-    networks:
-      - openhab
-      - proxy
-      - cloudflare
-    ports:
-      - "172.17.0.1:8099:8080"
     environment:
       TZ: ${TZ:-America/New_York}
+      CONTAINER_NAME: openhab-server
+      HOSTNAME: ${BASE_HOST_NAME:-$HOSTNAME}
+      # openHAB runtime settings
       OPENHAB_HTTP_PORT: ${OPENHAB_HTTP_PORT:-8080}
       OPENHAB_HTTPS_PORT: ${OPENHAB_HTTPS_PORT:-8443}
-      EXTRA_JAVA_OPTS: "-Duser.timezone=${TZ:-America/New_York}"
-      CONTAINER_NAME: openhab-app
-      HOSTNAME: ${BASE_HOST_NAME:-$HOSTNAME}
+      EXTRA_JAVA_OPTS: -Duser.timezone=${TZ:-America/New_York}
+    ports:
+      - '172.17.0.1:64285:8080'
     volumes:
-      - ./volumes/config/openhab/addons:/openhab/addons
-      - ./volumes/config/openhab/conf:/openhab/conf
-      - ./volumes/data/openhab:/openhab/userdata
-    labels:
-      - 'traefik.enable=true'
-      - 'cloudflare.enable=true'
-      - 'traefik.docker.network=proxy'
-      - 'cloudflare.service=http://openhab-app:8080'
-      - 'cloudflare.hostname=openhab.${CLOUDFLARE_ZONE_NAME:-}'
-      - 'traefik.http.routers.openhab-app.entrypoints=http'
-      - 'traefik.http.routers.openhab-app-secure.tls=true'
-      - 'traefik.http.routers.openhab-app.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
-      - 'traefik.http.middlewares.openhab-app-https-redirect.redirectscheme.scheme=https'
-      - 'traefik.http.routers.openhab-app.middlewares=openhab-app-https-redirect'
-      - 'traefik.http.routers.openhab-app-secure.entrypoints=https'
-      - 'traefik.http.routers.openhab-app-secure.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
-      - 'traefik.http.routers.openhab-app-secure.tls.certresolver=cloudflare'
-      - 'traefik.http.routers.openhab-app-secure.service=openhab-app'
-      - 'traefik.http.services.openhab-app.loadbalancer.server.port=8080'
+      - './volumes/config/openhab/addons:/openhab/addons'
+      - './volumes/config/openhab/conf:/openhab/conf'
+      - './volumes/data/openhab:/openhab/userdata'
+    networks:
+      - openhab
 
 networks:
   openhab:
+    name: openhab
     external: false
-  proxy:
-    external: true
-  cloudflare:
-    external: true

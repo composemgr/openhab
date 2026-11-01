@@ -1,14 +1,14 @@
 ## 👋 Welcome to openhab 🚀
 
-Vendor and technology agnostic home automation
+Open-source home automation platform
 
 ## 📋 Description
 
-Vendor and technology agnostic home automation
+Open-source home automation platform
 
 ## 🚀 Services
 
-- **openhab**: openhab/openhab:latest
+- **server**: openhab/openhab:latest
 
 ## 📦 Installation
 
@@ -21,7 +21,8 @@ curl -q -LSsf "https://raw.githubusercontent.com/composemgr/openhab/main/docker-
 ```bash
 git clone "https://github.com/composemgr/openhab" ~/.local/srv/docker/openhab
 cd ~/.local/srv/docker/openhab
-docker compose up -d
+cp default.env .env
+docker compose --env-file .env up -d
 ```
 
 ### Option 3: Using composemgr
@@ -35,42 +36,97 @@ composemgr install openhab
 
 ```shell
 TZ=America/New_York
+BASE_DOMAIN_NAME=example.com
+BASE_HOST_NAME=openhab.example.com
+SERVICE_USER=1000
+SERVICE_GROUP=1000
+OPENHAB_HTTP_PORT=8080
+OPENHAB_HTTPS_PORT=8443
+EMAIL_SERVER_PORT=587
+EMAIL_SERVER_HOST=172.17.0.1
+EMAIL_SERVER_MAIL_FROM=no-reply@example.com
+EMAIL_SERVER_LOGIN_NAME=replace-with-your-smtp-username
+EMAIL_SERVER_LOGIN_PASS=replace-with-your-smtp-password
+CLOUDFLARE_ZONE_NAME=example.com
+CLOUDFLARE_TUNNEL_ID=replace-with-your-tunnel-id
 ```
 
 See `docker-compose.yaml` for complete list of configurable options.
 
+### Environment Files
+
+`default.env.sample` holds the full set of variables and is copied to `.env`
+before starting the stack:
+
+```bash
+cp default.env .env
+docker compose --env-file .env up -d
+```
+
+`app.env.sample` holds the app-specific overrides and is copied to `app.env`:
+
+```bash
+cp app.env.sample app.env
+```
+
+`composemgr up` applies `app.env` and `default.env` automatically. Raw
+`docker compose` commands need `--env-file .env` to pick up the same values.
+
+### Reverse Proxy
+
+Three standalone compose files ship in this repo:
+
+| File | Use |
+|------|-----|
+| `docker-compose.yaml` | Default, published on `172.17.0.1:64285` |
+| `docker-compose.traefik.yaml` | Behind an existing external `traefik` network |
+| `docker-compose.tunnel.yaml` | Behind an existing external `cloudflare` tunnel network |
+
+```bash
+docker compose -f docker-compose.traefik.yaml --env-file .env up -d
+```
+
 ## 🌐 Access
 
-- **Web Interface**: http://172.17.0.1:8099
+- **Web Interface**: http://172.17.0.1:64285
 
 ## 📂 Volumes
 
-- `./volumes/config/openhab` - Data storage
-- `./volumes/data/openhab` - Data storage
+- `./volumes/config/openhab/addons` - Add-ons
+- `./volumes/config/openhab/conf` - Configuration
+- `./volumes/data/openhab` - Application data
+
+## 🔐 Security
+
+- Change all default passwords before deploying to production
+- Use strong secrets for all authentication tokens
+- Configure HTTPS using a reverse proxy (nginx, traefik, caddy)
+- Regularly update Docker images for security patches
+- Backup your data regularly
 
 ## 🔍 Logging
 
 ```shell
-docker compose logs -f openhab
+docker compose --env-file .env logs -f server
 ```
 
 ## 🛠️ Management
 
 ```bash
 # Start services
-docker compose up -d
+docker compose --env-file .env up -d
 
 # Stop services
-docker compose down
+docker compose --env-file .env down
 
 # Update to latest images
-docker compose pull && docker compose up -d
+docker compose --env-file .env pull && docker compose --env-file .env up -d
 
 # View logs
-docker compose logs -f
+docker compose --env-file .env logs -f
 
 # Restart services
-docker compose restart
+docker compose --env-file .env restart
 ```
 
 ## 📋 Requirements
@@ -80,5 +136,5 @@ docker compose restart
 
 ## 🤝 Author
 
-🤖 casjay: [Github](https://github.com/casjay) 🤖  
+🤖 casjay: [Github](https://github.com/casjay) 🤖
 🦄 composemgr: [Github](https://github.com/composemgr) 🦄
